@@ -4,3 +4,5 @@ scripts/
 venv/
 local_start.bat
 requester.py
+main_local.py
+local_start.bat
