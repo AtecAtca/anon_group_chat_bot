@@ -8,11 +8,11 @@ from handlers.callbacks import callback_handlers
 import os
 
 async def on_startup(_):
-    bot.set_webhook(os.environ.get('URL_APP'))
+    await bot.set_webhook(os.environ.get('URL_APP'))
     logger.info('Executor started.')
 
 async def on_shutdown(_):
-    bot.delete_webhook()
+    await bot.delete_webhook()
     db.close_on_shutdown()
     logger.info('Executor finished.')
 
