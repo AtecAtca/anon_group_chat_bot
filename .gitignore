@@ -1,0 +1,6 @@
+.idea/
+__pycache__/
+scripts/
+venv/
+local_start.bat
+requester.py
