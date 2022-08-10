@@ -1,11 +1,9 @@
-from aiogram import types
 import psycopg2 as pg
-from psycopg2.errors import UniqueViolation
 from string import ascii_uppercase
 from random import choice
-import os
 from tools.logger import get_logger
 from tools.messages import all_symbols
+import os
 
 class dataBase():
     def __init__(self, type: str):
@@ -20,26 +18,92 @@ class dataBase():
 
     def close_on_shutdown(self) -> None:
         self.conn.close()
-
-# REGISTER NEW USER
+# GET
 #=======================================================================================================================
+    async def get(self,
+                  items: tuple,
+                  table_name: str,
+                  condition: dict,
+                  order_by: dict=None,
+                  fetchall=False,):
 
-    async def register_new_user(self, uid: int, message: types.Message, language: str) -> None:
-        first_name = message.from_user.first_name
-        nickname = f'user-{uid}'
-        status = in_chat = None
-        code = await self.get_unique_code()
+        key, value = tuple(condition.items())[0]
+        query = f'SELECT {", ".join(items)} FROM {table_name} WHERE {key} = %s'
+
         with self.conn:
             with self.conn.cursor() as cur:
-                logger.debug(f'''"INSERT INTO users (tg_id, tg_name, nickname, language, status, in_chat, code) 
-                                  VALUES ({uid}, {first_name}, {nickname}, {language}, {status}, {in_chat}, {code})"''')
-                cur.execute('''INSERT INTO users (tg_id, tg_name, nickname, language, status, in_chat, code)
-                               VALUES (%s, %s, %s, %s, %s, %s, %s)''',
-                              (uid, first_name, nickname, language, status, in_chat, code,))
+                if order_by is not None:
+                    query += ' ORDER BY {} {}'.format(*tuple(order_by.items())[0])
+
+                cur.execute(query, (value,))
+                result = cur.fetchall() if fetchall else cur.fetchone()
+                if result is None:
+                    logger.debug(f'method db.get: return result=None')
+                    return None
+                else:
+                    if len(items) == 1:
+                        logger.debug(f'method db.get: return result={result[0]}')
+                        return result[0]
+                    else:
+                        logger.debug(f'method db.get: return result={result}')
+                        return result
+# UPDATE
+#=======================================================================================================================
+    async def update(self,
+                     items: dict,
+                     table_name: str,
+                     condition: dict,
+                     array_func: str=None):
+
+        item_key, item_value = tuple(items.items())[0]
+        condition_key, condition_value = tuple(condition.items())[0]
+
+        if array_func is None:
+            query = f'UPDATE {table_name} SET {item_key} = %s WHERE {condition_key} = %s;'
+        else:
+            query = f'UPDATE {table_name} SET {item_key} = {array_func}({item_key}, %s) WHERE {condition_key} = %s;'
+
+        with self.conn:
+            with self.conn.cursor() as cur:
+                logger.debug(f'method db.update: {query}, {item_value, condition_value}')
+                cur.execute(query, (item_value, condition_value))
+
+    async def update_many(self,
+                          items: dict,
+                          table_name: str,
+                          condition: dict,
+                          set_pool='SET ',
+                          item_values=None):
+
+        if item_values is None:
+            item_values = []
+        condition_key, condition_value = tuple(condition.items())[0]
+
+        for key, value in items.items():
+            item_values.append(value)
+            set_pool += f'{key} = %s, '
+        query = f'UPDATE {table_name} {set_pool[:-2]} WHERE {condition_key} = %s;'
+
+        with self.conn:
+            with self.conn.cursor() as cur:
+                logger.debug(f'method db.update_many: {query}, {*item_values, condition_value}')
+                cur.execute(query, (*item_values, condition_value))
+
+# INSERT
+#=======================================================================================================================
+    async def insert(self, items: dict, table_name: str):
+        keys = [key for key in items.keys()]
+        values = [value for value in items.values()]
+        columns = (", ".join(keys)).replace("'", '')
+        columns_values = "%s, " * len(keys)
+        query = f'INSERT INTO {table_name} ({columns}) VALUES ({columns_values[:-2]});'
+        with self.conn:
+            with self.conn.cursor() as cur:
+                logger.debug(f'method db.insert: {query}, {values}')
+                cur.execute(query, values)
 
 # CODE
 #=======================================================================================================================
-
     def create_code(self) -> str:
         code = ''
         for i in range(1, 5):
@@ -47,26 +111,14 @@ class dataBase():
         logger.debug(f'method db.create_code: return code={code}')
         return code
 
-    async def get_all_codes(self, code: str) -> list:
-        with self.conn:
-            with self.conn.cursor() as cur:
-                logger.debug(f'method db.get_all_codes: SELECT code FROM users WHERE code = {code}')
-                cur.execute('SELECT code FROM users WHERE code = %s', (code,))
-                result = cur.fetchall()
-                logger.debug(f'method db.get_all_codes: return result={result}')
-                return result
-
     async def get_unique_code(self) -> str:
         code = self.create_code()
-        all_codes = await self.get_all_codes(code)
-        while code in all_codes:
-            all_codes = await self.get_all_codes()
+        while await self.get(table_name='users',
+                             items=('code',),
+                             condition={'code': code}) is not None:
             code = self.create_code()
         logger.debug(f'method db.get_unique_code: return code={code}')
         return code
-
-# NICKNAME
-#=======================================================================================================================
 
     def is_nickname_in_all_symbols(self, nickname: str) -> bool:
         for i in nickname.lower():
@@ -76,61 +128,35 @@ class dataBase():
         logger.debug(f'method db.is_nickname_in_all_symbols: return True')
         return True
 
-    async def is_nickname_unique(self, nickname: types.Message) -> bool:
+
+
+    async def get_chat_members(self, uid: int):
+        query = """SELECT chats.chat_members 
+                   FROM chats JOIN users 
+                   ON chats.chat_code = users.in_chat
+                   AND users.tg_id = %s"""
         with self.conn:
             with self.conn.cursor() as cur:
-                logger.debug(f'method db.is_nickname_unique: SELECT nickname FROM users WHERE nickname = {nickname}')
-                cur.execute('SELECT nickname FROM users WHERE nickname = %s', (nickname,))
+                logger.debug(f'method db.get_chat_members: {query}')
+                cur.execute(query, (uid,))
                 result = cur.fetchone()
                 if result is None:
-                    logger.debug(f'method db.is_nickname_unique: return True')
-                    return True
-                else:
-                    logger.debug(f'method db.is_nickname_unique: return False')
-                    return False
-
-    async def update_nickname(self, uid: types.Message, nickname: types.Message) -> None:
-        with self.conn:
-            with self.conn.cursor() as cur:
-                logger.debug(f'method db.update_nickname: UPDATE users SET nickname = {nickname} WHERE tg_id = {uid}')
-                cur.execute('UPDATE users SET nickname = %s WHERE tg_id = %s', (nickname, uid))
-
-# STATUS
-#=======================================================================================================================
-
-    async def get_status(self, uid: types.Message) -> None or bool:
-        with self.conn:
-            with self.conn.cursor() as cur:
-                cur.execute('SELECT status FROM users WHERE tg_id= %s', (uid,))
-                result = cur.fetchone()
-                if result is None:
-                    logger.debug(f'method db.get_user_status: return result=None')
+                    logger.debug(f'method db.get_chat_members: return result=None')
                     return None
                 else:
-                    logger.debug(f'method db.get_user_status: return result={result[0]}')
+                    logger.debug(f'method db.get_chat_members: return result={result[0]}')
                     return result[0]
 
-    async def update_status(self, uid: types.Message, status: types.Message) -> None:
-        with self.conn:
-            with self.conn.cursor() as cur:
-                logger.debug(f'method db.update_status: UPDATE users SET status = {status} WHERE tg_id = {uid}')
-                cur.execute('UPDATE users SET status = %s WHERE tg_id = %s', (status, uid))
 
-# LANGUAGE
-#=======================================================================================================================
 
-    async def get_language(self, uid) -> str:
-        with self.conn:
-            with self.conn.cursor() as cur:
-                cur.execute('SELECT language FROM users WHERE tg_id = %s', (uid,))
-                result = cur.fetchone()
-                if result is None:
-                    logger.debug(f'method db.get_user_language: return result=RU')
-                    return 'RU'
-                else:
-                    logger.debug(f'method db.get_user_language: return result={result[0]}')
-                    return result[0]
+
+
 
 logger = get_logger('main.tools.database')
 db = dataBase('web')
 #db = dataBase('local')
+
+
+
+
+
