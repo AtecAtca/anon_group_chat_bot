@@ -1,7 +1,7 @@
 from aiogram import types
 from aiogram.dispatcher import Dispatcher
+from aiogram.dispatcher.filters import Text
 from aiogram.utils.exceptions import BotBlocked
-from tools.messages import all_messages
 from tools.logger import get_logger
 from tools.database import db
 from tools.bot import bot
@@ -24,7 +24,7 @@ async def connect(callback: types.CallbackQuery):
     await db.update(table_name='users',
                     items={'status': 'in_connect'},
                     condition={'tg_id': uid})
-
+    await callback.answer()
 
 async def connect_public(callback: types.CallbackQuery):
     logger.debug(f'function connect_public: get "connect_public" callback {callback}')
@@ -45,7 +45,7 @@ async def connect_public(callback: types.CallbackQuery):
     await db.update(table_name='users',
                     items={'status': 'in_connect_public'},
                     condition={'tg_id': uid})
-
+    await callback.answer()
 
 async def connect_private(callback: types.CallbackQuery):
     logger.debug(f'function connect_private: get "connect_private" callback {callback}')
@@ -60,7 +60,7 @@ async def connect_private(callback: types.CallbackQuery):
     await db.update(table_name='users',
                     items={'status': 'in_connect_private'},
                     condition={'tg_id': uid})
-
+    await callback.answer()
 
 async def create(callback: types.CallbackQuery):
     logger.debug(f'function create: get "create" callback {callback}')
@@ -75,7 +75,7 @@ async def create(callback: types.CallbackQuery):
     await db.update(table_name='users',
                     items={'status': 'in_create'},
                     condition={'tg_id': uid})
-
+    await callback.answer()
 
 async def create_open(callback: types.CallbackQuery):
     logger.debug(f'function create_open: get "create_open" callback {callback}')
@@ -90,7 +90,7 @@ async def create_open(callback: types.CallbackQuery):
     await db.update(table_name='users',
                     items={'status': 'in_create_open'},
                     condition={'tg_id': uid})
-
+    await callback.answer()
 
 async def create_secret(callback: types.CallbackQuery):
     logger.debug(f'function create_secret: get "create_secret" callback {callback}')
@@ -105,7 +105,7 @@ async def create_secret(callback: types.CallbackQuery):
     await db.update(table_name='users',
                     items={'status': 'in_create_secret'},
                     condition={'tg_id': uid})
-
+    await callback.answer()
 
 async def settings(callback: types.CallbackQuery):
     logger.debug(f'function settings: get "settings" callback {callback}')
@@ -123,7 +123,7 @@ async def settings(callback: types.CallbackQuery):
     await db.update(table_name='users',
                     items={'status': 'in_settings'},
                     condition={'tg_id': uid})
-
+    await callback.answer()
 
 async def nickname(callback: types.CallbackQuery):
     logger.debug(f'function nickname: get "nickname" callback {callback}')
@@ -139,7 +139,7 @@ async def nickname(callback: types.CallbackQuery):
     await db.update(table_name='users',
                     items={'status': 'in_set_nickname'},
                     condition={'tg_id': uid})
-
+    await callback.answer()
 
 async def language(callback: types.CallbackQuery):
     logger.debug(f'function language: get "language" callback {callback}')
@@ -162,7 +162,7 @@ async def language(callback: types.CallbackQuery):
     await db.update(table_name='users',
                     items={'status': 'in_set_language'},
                     condition={'tg_id': uid})
-
+    await callback.answer()
 
 async def flag(callback: types.CallbackQuery):
     logger.debug(f'function language: get "language" callback {callback}')
@@ -181,7 +181,7 @@ async def flag(callback: types.CallbackQuery):
     await db.update(table_name='users',
                     items={'status': 'in_set_flag'},
                     condition={'tg_id': uid})
-
+    await callback.answer()
 
 
 
@@ -199,7 +199,7 @@ async def back_to_menu(callback: types.CallbackQuery):
     await db.update(table_name='users',
                     items={'status': 'in_menu'},
                     condition={'tg_id': uid})
-
+    await callback.answer()
 
 
 
@@ -248,12 +248,12 @@ async def join_public(callback: types.CallbackQuery):
                                                 .format(nickname, flag))
                 except BotBlocked as e:
                     logger.exception(e)
+    await callback.answer()
 
-
-
+#Text(startswith='connect_private')
 
 def callback_handlers(dp: Dispatcher):
-    dp.register_callback_query_handler(connect_private, lambda callback: callback.data.startswith('connect_private'))
+    dp.register_callback_query_handler(connect_private, Text(startswith='connect_private'))
     dp.register_callback_query_handler(connect_public, lambda callback: callback.data.startswith('connect_public'))
     dp.register_callback_query_handler(connect, lambda callback: callback.data.startswith('connect'))
     dp.register_callback_query_handler(create_secret, lambda callback: callback.data.startswith('create_secret'))
