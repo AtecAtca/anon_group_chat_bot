@@ -21,17 +21,15 @@ async def start_menu(message: types.Message):
             username = message.from_user.username
             language = default['language']
             await db.insert(table_name='users',
-                            items={
-                                'tg_id': uid,
-                                'tg_name': message.from_user.first_name,
-                                'nickname': f'user-{uid}',
-                                'language': language,
-                                'flag': None,
-                                'status': None,
-                                'in_chat': None,
-                                'code': await db.get_unique_code(),
-                                'username': username})
-            #await db.register_new_user(uid, message, language)
+                            items={'tg_id': uid,
+                                   'tg_name': message.from_user.first_name,
+                                   'nickname': f'user-{uid}',
+                                   'language': language,
+                                   'flag': None,
+                                   'status': None,
+                                   'in_chat': None,
+                                   'code': await db.get_unique_code(),
+                                   'username': username})
             await bot.send_message(uid, all_messages['NICKNAME']['CREATE NICKNAME'][language])
             await db.update(table_name='users',
                             items={'status': 'without_nickname'},
@@ -51,51 +49,40 @@ async def start_menu(message: types.Message):
                                    reply_markup=kb.get('MENU KEYBOARD', language))
         # user in public chat
         case 'in_public_chat':
-            in_chat, language, nickname, flag = await db.get(table_name='users',
-                                                             items=('in_chat', 'language', 'nickname', 'flag'),
-                                                             condition={'tg_id': uid})
-            chat_name, chat_members = await db.get(table_name='chats',
-                                                   items=('chat_name', 'chat_members'),
-                                                   condition={'chat_code': in_chat})
-            await db.update(table_name='chats',
-                            items={'chat_members': uid},
-                            array_func='array_remove',
-                            condition={'chat_code': in_chat})
-
-            if len(chat_members) > 1:
-                if flag is None:
-                    flag = ''
-                else:
-                    flag = f'[{flag}]'
-
-                for member in chat_members:
-                    if member != uid:
-                        member_language = await db.get(table_name='users',
-                                                items=('language',),
-                                                condition={'tg_id': member})
-                        try:
-                            await bot.send_message(chat_id=member,
-                                                   parse_mode='html',
-                                                   text=all_messages['USER DISCONNECT'][member_language]\
-                                                        .format(nickname, flag))
-                        except BotBlocked as e:
-                            logger.exception(e)
-
+            chat_name = await db.get_chat_name(uid)
+            chat_members_data = [i for i in await db.get_chat_members(uid, with_language=True)]
+            await db.update_many(table_name='users',
+                                 items={'status': 'in_menu', 'in_chat': None},
+                                 condition={'tg_id': uid})
+            if chat_members_data:
+                nickname, flag = await db.get(table_name='users',
+                                              items=('nickname', 'flag'),
+                                              condition={'tg_id': uid})
+                flag = '' if flag is None else f'[{flag}]'
+                for member_data in chat_members_data:
+                    member_uid, member_language = member_data
+                    try:
+                        await bot.send_message(chat_id=member_uid,
+                                               parse_mode='html',
+                                               text=all_messages['USER DISCONNECT'][member_language]\
+                                                    .format(nickname, flag))
+                    except BotBlocked as e:
+                         logger.exception(e)
+                         await db.update_many(table_name='users',
+                                              items={'status': 'bot_blocked', 'in_chat': None},
+                                              condition={'tg_id': member_uid})
+            language = await db.get(table_name='users',
+                                    items=('language',),
+                                    condition={'tg_id': uid})
             await bot.send_message(chat_id=uid,
                                    parse_mode='html',
                                    text=all_messages['OFF PUBLIC'][language]\
                                         .format(all_keyboards['PUBLIC CHATS KEYBOARD']\
                                                              [f'{chat_name.upper()} BUTTON']\
                                                              ['NAME'][language].rstrip()))
-            await db.update_many(table_name='users',
-                                 items={'status': 'in_menu', 'in_chat': None},
-                                 condition={'tg_id': uid})
-
             await bot.send_message(chat_id=uid,
                                    text=all_messages['MENU'][language],
                                    reply_markup=kb.get('MENU KEYBOARD', language))
-
-
         # user press command in other menus
         case _:
             language = await db.get(table_name='users',

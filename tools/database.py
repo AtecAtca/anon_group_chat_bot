@@ -130,26 +130,58 @@ class dataBase():
 
 
 
-    async def get_chat_members(self, uid: int):
-        query = """SELECT chats.chat_members 
-                   FROM chats JOIN users 
-                   ON chats.chat_code = users.in_chat
-                   AND users.tg_id = %s"""
+    async def get_chat_members(self, uid: int, with_language=False):
+        if with_language:
+            query = "SELECT * FROM get_chat_members_with_language(%s);"
+        else:
+            query = "SELECT * FROM get_chat_members_with_not_language(%s);"
+
         with self.conn:
             with self.conn.cursor() as cur:
                 logger.debug(f'method db.get_chat_members: {query}')
                 cur.execute(query, (uid,))
-                result = cur.fetchone()
+                result = cur.fetchall()
                 if result is None:
                     logger.debug(f'method db.get_chat_members: return result=None')
                     return None
                 else:
-                    logger.debug(f'method db.get_chat_members: return result={result[0]}')
+                    logger.debug(f'method db.get_chat_members: return result={result}')
+                    return result
+
+
+
+
+    async def get_chat_name(self, uid):
+        query = "SELECT chat_name FROM chats WHERE chat_code = get_chat_code(%s);"
+        with self.conn:
+            with self.conn.cursor() as cur:
+                logger.debug(f'method db.get_chat_name: {query}')
+                cur.execute(query, (uid,))
+                result = cur.fetchone()
+                if result is None:
+                    logger.debug(f'method db.get_chat_name: return result=None')
+                    return None
+                else:
+                    logger.debug(f'method db.get_chat_name: return result={result[0]}')
                     return result[0]
 
 
-
-
+    async def get_public_chats_data(self):
+        query = """SELECT chats.chat_name, 
+                          chats.chat_code,
+	                      COUNT(users.in_chat) AS count_
+                   FROM chats
+                   LEFT JOIN users
+                   ON chats.chat_code = users.in_chat
+                   GROUP BY chats.chat_code, chats.chat_name
+                   ORDER BY count_ DESC"""
+        with self.conn:
+            with self.conn.cursor() as cur:
+                logger.debug(f'method db.get_public_chats_data: {query}')
+                cur.execute(query)
+                result = cur.fetchall()
+                logger.debug(f'method db.get_public_chats_data: return result={result}')
+                return result
 
 
 logger = get_logger('main.tools.database')

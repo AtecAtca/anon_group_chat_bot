@@ -11,14 +11,11 @@ kb = Keyboard()
 
 async def message(message: types.Message):
     logger.debug(f'user {message.from_user.id} write message {message.text}')
-    logger.debug(f'{message}')
     uid = message.from_user.id
     uid_status, language = await db.get(table_name='users',
                                         items=('status', 'language'),
                                         condition={'tg_id': uid})
-    if language is None:
-        language = default['language']
-
+    language = default['language'] if language is None else language
     match uid_status:
         # new user without nickname or user edit nickname
         case 'without_nickname' | 'in_set_nickname':
@@ -75,26 +72,30 @@ async def message(message: types.Message):
 
         # user in public chat
         case 'in_public_chat':
-
-
-            chat_members = await db.get_chat_members(uid)
-            if len(chat_members) > 1:
+            chat_members = [i[0] for i in await db.get_chat_members(uid)]
+            if chat_members:
                 nickname, flag = await db.get(table_name='users',
                                               items=('nickname', 'flag'),
                                               condition={'tg_id': uid})
-                if flag is None:
-                    flag = ''
-                else:
-                    flag = f'[{flag}]'
-                signature = f'<code>{nickname}{flag}:</code>\n'
+                flag = '' if flag is None else f'[{flag}]'
+                signature = f'{nickname}{flag}'
                 for member in chat_members:
-                    if member != uid:
-                        try:
-                            await send_message(message, member, signature=signature)
-                        except BotBlocked as e:
-                            logger.exception(e)
-
-
+                    try:
+                        await send_message(message, member, signature=signature)
+                    except BotBlocked as e:
+                        logger.exception(e)
+                        await db.update_many(table_name='users',
+                                             items={'status': 'bot_blocked', 'in_chat': None},
+                                             condition={'tg_id': member})
+        case 'bot_blocked':
+            language = await db.get(table_name='users',
+                                    items=('language',),
+                                    condition={'tg_id': uid})
+            await bot.send_message(uid, all_messages['MENU'][language],
+                                   reply_markup=kb.get('MENU KEYBOARD', language))
+            await db.update(table_name='users',
+                            items={'status': 'in_menu'},
+                            condition={'tg_id': uid})
         # user write message in other menus
         case _:
             await bot.delete_message(uid, message.message_id)
@@ -106,9 +107,9 @@ async def message(message: types.Message):
 
 async def send_message(message: types.Message, member, signature):
     if message.text is None:
-        text = signature
+        text = f'<code>{signature}</code>'
     else:
-        text = signature + message.text
+        text = f'<code>{signature}:</code>\n{message.text}'
     try:
         if message.sticker:
             await bot.send_sticker(member, sticker=message.sticker.file_id)

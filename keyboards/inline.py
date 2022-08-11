@@ -46,16 +46,14 @@ class Keyboard():
         logger.debug(f'method kb.get_language_keyboard: return keyboard={keyboard}')
         return keyboard
 
-    def get_public_chats(self, public_chats: list, language):
+    def get_public_chats(self, public_chats_data: list, language):
         keyboard = InlineKeyboardMarkup(row_width=1)
         key_back_to_connection = all_keyboards['PUBLIC CHATS KEYBOARD']['BACK TO CONNECTION BUTTON']['NAME'][language]
 
-        for chat_name, chat_code, members in public_chats:
+        for chat_name, chat_code, members_online in public_chats_data:
             text = all_keyboards['PUBLIC CHATS KEYBOARD'][f'{chat_name.upper()} BUTTON']['NAME'][language] +\
-                   all_messages['MEMBERS COUNT'][language].format(len(members))
-            keyboard.add(Button(text, callback_data=f'join:{chat_code}'))
-
-
+                   all_messages['MEMBERS COUNT'][language].format(members_online)
+            keyboard.add(Button(text, callback_data=f'join_public:{chat_code}'))
         keyboard.add(Button(key_back_to_connection, callback_data='connect'))
         logger.debug(f'method kb.get_public_chats: return keyboard={keyboard}')
         return keyboard

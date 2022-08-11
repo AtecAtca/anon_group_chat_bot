@@ -9,24 +9,25 @@ default = {
     'language': 'RU'
 }
 
+# 'CALLBACK DATA': 'connect',
 all_keyboards = {
     'MENU KEYBOARD': {
         'CONNECT BUTTON': {
-            'CALLBACK DATA': 'connect',
+            'CALLBACK DATA': 'connect_public',
             'NAME': {
                 'UA': 'Підключитись',
                 'RU': 'Подключиться',
                 'EN': 'Connect',
             }
         },
-        'CREATE BUTTON': {
-            'CALLBACK DATA': 'create',
-            'NAME': {
-                'UA': 'Створити',
-                'RU': 'Создать',
-                'EN': 'Create',
-            }
-        },
+#        'CREATE BUTTON': {
+#            'CALLBACK DATA': 'create',
+#            'NAME': {
+#                'UA': 'Створити',
+#                'RU': 'Создать',
+#                'EN': 'Create',
+#            }
+#        },
         'SETTINGS BUTTON': {
             'CALLBACK DATA': 'settings',
             'NAME': {
@@ -45,14 +46,14 @@ all_keyboards = {
                 'EN': 'Public chats',
             }
         },
-        'PRIVATE CHATS': {
-            'CALLBACK DATA': 'connect_private',
-            'NAME': {
-                'UA': 'Приватні чати',
-                'RU': 'Приватные чаты',
-                'EN': 'Private chats',
-            }
-        },
+#        'PRIVATE CHATS': {
+#            'CALLBACK DATA': 'connect_private',
+#            'NAME': {
+#                'UA': 'Приватні чати',
+#                'RU': 'Приватные чаты',
+#                'EN': 'Private chats',
+#            }
+#        },
         'BACK TO MENU BUTTON': {
             'CALLBACK DATA': 'back_to_menu',
             'NAME': {
