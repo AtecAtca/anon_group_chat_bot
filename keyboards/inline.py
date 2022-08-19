@@ -9,9 +9,9 @@ class Keyboard():
     def __init__(self):
         self.languages = ['UA', 'RU', 'EN']
         self.flags = {
-            'UA': '🇺🇦 Українська 🇺🇦',
-            'RU': '🇷🇺 Русский 🇷🇺',
-            'EN': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 English 🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+            'UA': '🇺🇦    УКРАЇНСЬКА',
+            'RU': '🇷🇺          РУССКИЙ',
+            'EN': '🏴󠁧󠁢󠁥󠁮󠁧󠁿            ENGLISH',
         }
         self.keyboards = {key:{}.fromkeys(self.languages) for key in all_keyboards.keys()}
         self.load_keyboards()
@@ -54,6 +54,6 @@ class Keyboard():
             text = all_keyboards['PUBLIC CHATS KEYBOARD'][f'{chat_name.upper()} BUTTON']['NAME'][language] +\
                    all_messages['MEMBERS COUNT'][language].format(members_online)
             keyboard.add(Button(text, callback_data=f'join_public:{chat_code}'))
-        keyboard.add(Button(key_back_to_connection, callback_data='connect'))
+        keyboard.add(Button(key_back_to_connection, callback_data='back_to_menu')) #callback_data='connect')
         logger.debug(f'method kb.get_public_chats: return keyboard={keyboard}')
         return keyboard

@@ -1,0 +1,350 @@
+Index: tools/messages.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tools/messages.py b/tools/messages.py
+--- a/tools/messages.py	
++++ b/tools/messages.py	(date 1660827799877)
+@@ -1,39 +1,48 @@
+ from string import ascii_lowercase, digits, punctuation
+ 
+ cyrillic_lowercase = 'абвгдежзийклмнопрстуфхцчшщъыьэюяёєії'
+-all_symbols = ascii_lowercase + cyrillic_lowercase + digits + punctuation + ' '
+-
+-
++all_symbols = ascii_lowercase + cyrillic_lowercase + digits + punctuation + ' ' + '<' + '>'
+ 
+ default = {
+     'language': 'RU'
+ }
+ 
+-# 'CALLBACK DATA': 'connect',
++old = {
++    'CREATE BUTTON': {
++        'CALLBACK DATA': 'create',
++        'NAME': {
++            'UA': 'Створити',
++            'RU': 'Создать',
++            'EN': 'Create',
++        }
++    },
++}
++
++
++
++
++
++
++
++
++
+ all_keyboards = {
+     'MENU KEYBOARD': {
+         'CONNECT BUTTON': {
+             'CALLBACK DATA': 'connect_public',
+             'NAME': {
+-                'UA': '🟢 ️   ПІДКЛЮЧИТИСЬ ️',
+-                'RU': '🟢       ПОДКЛЮЧИТЬСЯ',
+-                'EN': '🟢      CONNECT',
++                'UA': 'Підключитись',
++                'RU': 'Подключиться',
++                'EN': 'Connect',
+             }
+         },
+-#        'CREATE BUTTON': {
+-#            'CALLBACK DATA': 'create',
+-#            'NAME': {
+-#                'UA': 'Створити',
+-#                'RU': 'Создать',
+-#                'EN': 'Create',
+-#            }
+-#        },
++
+         'SETTINGS BUTTON': {
+             'CALLBACK DATA': 'settings',
+             'NAME': {
+-                'UA': '⚙️    НАЛАШТУВАННЯ',
+-                'RU': '⚙️                 НАСТРОЙКИ',
+-                'EN': '⚙️      SETTINGS',
++                'UA': 'Налаштування',
++                'RU': 'Настройки',
++                'EN': 'Settings',
+             }
+         },
+     },
+@@ -46,14 +55,14 @@
+                 'EN': 'Public chats',
+             }
+         },
+-#        'PRIVATE CHATS': {
+-#            'CALLBACK DATA': 'connect_private',
+-#            'NAME': {
+-#                'UA': 'Приватні чати',
+-#                'RU': 'Приватные чаты',
+-#                'EN': 'Private chats',
+-#            }
+-#        },
++        'PRIVATE CHATS': {
++            'CALLBACK DATA': 'connect_private',
++            'NAME': {
++                'UA': 'Приватні чати',
++                'RU': 'Приватные чаты',
++                'EN': 'Private chats',
++            }
++        },
+         'BACK TO MENU BUTTON': {
+             'CALLBACK DATA': 'back_to_menu',
+             'NAME': {
+@@ -93,100 +102,43 @@
+         'NICKNAME BUTTON': {
+             'CALLBACK DATA': 'nickname',
+             'NAME': {
+-                'UA': '😎       НІКНЕЙМ',
+-                'RU': '😎       НИКНЕЙМ',
+-                'EN': '😎       NICKNAME',
++                'UA': '😎 Нікнейм 😎',
++                'RU': '😎 Никнейм 😎',
++                'EN': '😎 Nickname 😎',
+             }
+         },
+         'LANGUAGE BUTTON': {
+             'CALLBACK DATA': 'language',
+             'NAME': {
+-                'UA': '💬              МОВА',
+-                'RU': '💬                 ЯЗЫК',
+-                'EN': '💬       LANGUAGE',
++                'UA': '💬 Мова 💬',
++                'RU': '💬 Язык 💬',
++                'EN': '💬 Language 💬',
+             }
+         },
+         'FLAG BUTTON': {
+             'CALLBACK DATA': 'flag',
+             'NAME': {
+-                'UA': '🏳️          ПРАПОР',
+-                'RU': '🏳️                ФЛАГ',
+-                'EN': '🏳️                   FLAG',
++                'UA': '🏳️ Прапор 🏳️',
++                'RU': '🏳️ Флаг 🏳️',
++                'EN': '🏳️ Flag 🏳️',
+             }
+         },
+         'BACK TO MENU BUTTON': {
+             'CALLBACK DATA': 'back_to_menu',
+             'NAME': {
+-                'UA': '← ГОЛОВНЕ МЕНЮ 🚫',
+-                'RU': '← ГЛАВНОЕ МЕНЮ 🚫',
+-                'EN': '← MAIN MENU 🚫',
++                'UA': '⬅️ Повернутись до меню',
++                'RU': '⬅️ Вернуться в меню',
++                'EN': '⬅️ Return to menu',
+             }
+         },
+     },
+-
+     'PUBLIC CHATS KEYBOARD': {
+-        'MEMES BUTTON': {
+-            'CALLBACK DATA': '0000',
+-            'NAME': {
+-                'UA': '🤡 Меми      ️ ️',
+-                'RU': '🤡 Мемы  ️ ️️ ️ ️     ️ ️️ ️ ️ ',
+-                'EN': '🤡 Memes',
+-            }
+-        },
+-        'GAMES BUTTON': {
+-            'CALLBACK DATA': '1111',
+-            'NAME': {
+-                'UA': '🎮 Ігри          ️ ️',
+-                'RU': '🎮 Игры    ️ ️️ ️ ️     ️ ️️ ️ ️ ',
+-                'EN': '🎮 Games',
+-            }
+-        },
+-        'MUSIC BUTTON': {
+-            'CALLBACK DATA': '2222',
+-            'NAME': {
+-                'UA': '🎧 Музика   ️ ️',
+-                'RU': '🎧 Музыка️️ ️ ️     ️ ️️ ️ ️ ',
+-                'EN': '🎧 Music ',
+-            }
+-        },
+-        'FILMS BUTTON': {
+-            'CALLBACK DATA': '3333',
+-            'NAME': {
+-                'UA': '🎬 Кіно          ️ ️',
+-                'RU': '🎬 Кино     ️ ️️ ️ ️     ️ ️️ ️ ️ ',
+-                'EN': '🎬 Films  ',
+-            }
+-        },
+-        'ANIME BUTTON': {
+-            'CALLBACK DATA': '4444',
+-            'NAME': {
+-                'UA': '💩 Аніме ️ ️     ️ ️',
+-                'RU': '💩 Аниме  ️ ️️ ️ ️     ️ ️️ ️ ️ ',
+-                'EN': '💩 Anime',
+-            }
+-        },
+-        'BOOKS BUTTON': {
+-            'CALLBACK DATA': '5555',
+-            'NAME': {
+-                'UA': '📖 Книги    ️ ️️ ️ ️ ',
+-                'RU': '📖 Книги   ️ ️️ ️ ️     ️ ️️ ️ ️ ',
+-                'EN': '📖 Books',
+-            }
+-        },
+-        'TRAVEL BUTTON': {
+-            'CALLBACK DATA': '6666',
+-            'NAME': {
+-                'UA': '🗺 Подорожі',
+-                'RU': '🗺 Путешествия',
+-                'EN': '🗺 Travel',
+-            }
+-        },
+         'BACK TO CONNECTION BUTTON': {
+-            'CALLBACK DATA': 'back_to_menu', #'connect'
++            'CALLBACK DATA': 'connect',
+             'NAME': {
+-                'UA': '← ГОЛОВНЕ МЕНЮ 🚫',
+-                'RU': '← ГЛАВНОЕ МЕНЮ 🚫',
+-                'EN': '← MAIN MENU 🚫',
++                'UA': '⬅️ Повернутись назад',
++                'RU': '⬅️ Вернуться назад',
++                'EN': '⬅️ Return back',
+             }
+         },
+     },
+@@ -224,9 +176,9 @@
+         'BACK TO SETTINGS BUTTON': {
+             'CALLBACK DATA': 'settings',
+             'NAME': {
+-                'UA': '← НАЛАШТУВАННЯ 🚫',
+-                'RU': '← НАСТРОЙКИ 🚫',
+-                'EN': '← SETTINGS 🚫',
++                'UA': '⬅️ Повернутись назад',
++                'RU': '⬅️ Вернуться назад',
++                'EN': '⬅️ Return back',
+             }
+         },
+     },
+@@ -234,9 +186,9 @@
+         'BACK TO SETTINGS BUTTON': {
+             'CALLBACK DATA': 'settings',
+             'NAME': {
+-                'UA': '← НАЛАШТУВАННЯ 🚫',
+-                'RU': '← НАСТРОЙКИ 🚫',
+-                'EN': '← SETTINGS 🚫',
++                'UA': '⬅️ Повернутись назад',
++                'RU': '⬅️ Вернуться назад',
++                'EN': '⬅️ Return back',
+             }
+         },
+     },
+@@ -244,13 +196,15 @@
+         'BACK TO SETTINGS BUTTON': {
+             'CALLBACK DATA': 'settings',
+             'NAME': {
+-                'UA': '← НАЛАШТУВАННЯ 🚫',
+-                'RU': '← НАСТРОЙКИ 🚫',
+-                'EN': '← SETTINGS 🚫',
++                'UA': '⬅️ Повернутись назад',
++                'RU': '⬅️ Вернуться назад',
++                'EN': '⬅️ Return back',
+             }
+         },
+     },
+ }
++
++
+ 
+ 
+ 
+@@ -286,53 +240,23 @@
+         },
+     },
+     'MENU': {
+-        'UA': '<u><b>🟢 ПІДКЛЮЧИТИСЬ</b></u>\n       До анонімних групових чатів.\n\n<u><b>⚙️ НАЛАШТУВАННЯ</b></u>\n       Мови, нікнейму та прапору.',
+-        'RU': '<u><b>🟢 ПОДКЛЮЧИТЬСЯ</b></u>\n       К анонимным групповым чатам.\n\n<u><b>⚙️ НАСТРОЙКИ</b></u>\n       Языка, никнейма и флага.',
+-        'EN': '<u><b>🟢 CONNECT</b></u>\n       To anonymous group chats.\n\n<u><b>⚙️ SETTINGS</b></u>\n       Language, nickname and flag.',
++        'UA': 'Головне меню',
++        'RU': 'Главное меню',
++        'EN': 'Main menu',
+     },
+     'CONNECT': {
+         'UA': 'Підключитись',
+         'RU': 'Подключиться',
+         'EN': 'Connect',
+     },
+-    'USER CONNECT': {
+-        'UA': '<b>🟢 До чату приєднався:</b>\n<code>{}{}</code>',
+-        'RU': '<b>🟢 К чату присоединился:</b>\n<code>{}{}</code>',
+-        'EN': '<b>🟢 Joined the chat:</b>\n<code>{}{}</code>',
+-    },
+-    'USER DISCONNECT': {
+-        'UA': '<b>🔴 Вийшов з чату:</b>\n<code>{}{}</code>',
+-        'RU': '<b>🔴 Вышел с чата:</b>\n<code>{}{}</code>',
+-        'EN': '<b>🔴 Left the chat:</b>\n<code>{}{}</code>',
+-    },
+-    'USER KICKED': {
+-        'UA': '<b>🔴 Учасник відключений за бездіяльність в чаті:</b>\n<code>{}{}</code>',
+-        'RU': '<b>🔴 Учасник отключен за бездействие в чате:</b>\n<code>{}{}</code>',
+-        'EN': '<b>🔴 Member disabled for chat inactivity:</b>\n<code>{}{}</code>',
+-    },
+-    'BOT BLOCKED': {
+-        'UA': '<b>🔴 Учасник заблокував бота та був відключений від чату:</b>\n<code>{}{}</code>',
+-        'RU': '<b>🔴 Учасник заблокировал бота и был отключен с чата:</b>\n<code>{}{}</code>',
+-        'EN': '<b>🔴 Member blocked the bot was disconnected from the chat:</b>\n<code>{}{}</code>',
+-    },
+     'CONNECT PUBLIC': {
+-        'UA': '◻️ <u><b>ПЕРЕЛІК</b></u> <u><b>ЧАТІВ</b></u> <u><b>ЗА</b></u> <u><b>ТЕМАМИ</b></u> 🔳\n\n◾️ <b>Заходь в чат, щоб спілкуватись</b>\n   ️ ️   ️ <b>з іншими учасниками\n</b><code>            ️ ️         \n   ️ ️</code>  <code> ⬇️⬇️</code>',
+-        'RU': '◻️ <u><b>СПИСОК</b></u> <u><b>ЧАТОВ</b></u> <u><b>ПО</b></u> <u><b>ТЕМАТИКАМ</b></u> 🔳\n\n◾️ <b>Переходи в чат, чтобы общаться</b>\n   ️ ️   ️ <b>с другими участниками\n</b><code>            ️ ️         \n   ️ ️</code>  <code> ⬇️⬇️</code>',
+-        'EN': '◻️ <u><b>LIST</b></u> <u><b>OF</b></u> <u><b>CHATS</b></u> <u><b>BY</b></u> <u><b>THEMES</b></u> 🔳\n\n◾️ <b>Connect the chat to talk</b>\n   ️ ️   ️ <b>with other members\n</b><code>            ️ ️         \n   ️ ️</code>  <code> ⬇️⬇️</code>',
+-    },
+-    'ON PUBLIC': {
+-        'UA': '<b>🟢 Ви підключені:</b>\nЧат: <code>{}</code>\nОнлайн: <code>[ {} ]</code>',
+-        'RU': '<b>🟢 Вы подключены:</b>\nЧат: <code>{}</code>\nОнлайн: <code>[ {} ]</code>',
+-        'EN': "<b>🟢 You're connected:</b>\nChat: <code>{}</code>\nOnline: <code>[ {} ]</code>",
+-    },
+-    'OFF PUBLIC': {
+-        'UA': '<b>🔴 Ви відключені:</b>\nЧат: <code>{}</code>',
+-        'RU': '<b>🔴 Вы отключены:</b>\nЧат: <code>{}</code>',
+-        'EN': "<b>🔴 You're disconnected:</b>\nChat: <code>{}</code>",
++        'UA': 'Список чатів за темами.',
++        'RU': 'Список чатов по тематикам.',
++        'EN': 'List of chats by topic',
+     },
+     'CONNECT PRIVATE': {
+         'UA': 'Список чатів за темами.',
+-        'RU': '<s><b>СПИСОК ЧАТОВ ПО ТЕМАТИКАМ</b></s>\n<code>   ️ ️    ️- выбирай - ️ ️            ️ ️     ️ ️ </code>  <code>⬇️⬇️</code>',
++        'RU': 'Список чатов по тематикам.',
+         'EN': 'List of chats by topic',
+     },
+     'CREATE': {
+@@ -380,17 +304,11 @@
+         'RU': '⚠️ Ошибка ввода или этот флаг не поддерживается!\nВведите флаг еще раз:',
+         'EN': '⚠️ An input error or this flag is not supported!\nEnter your flag again:',
+     },
+-    'MEMBERS COUNT': {
+-        'UA': ' | 👤 Онлайн: [ {} ]',
+-        'RU': ' | 👤 Онлайн: [ {} ]',
+-        'EN': ' | 👤 Online: [ {} ]',
++    'USER DISCONNECT': {
++        'UA': '🔴 <b>Користувач відключений за бездіяльність у чаті:</b>\n{}{}',
++        'RU': '🔴 <b>Пользователь отключен за бездействие в чате:</b>\n{}{}',
++        'EN': '🔴 <b>User disabled for chat inactivity:</b>\n{}{}',
+     },
+-    'KICKED MEMBER': {
+-        'UA': '<b>⚠️ Ви були відключені за бездіяльність у чаті.</b>\n\n/menu — відкрити головне меню.',
+-        'RU': '<b>⚠️ Вы были отключены за бездействие в чате.</b>\n\n/menu — открыть главное меню.',
+-        'EN': "<b>⚠️ You have been disconnected for chat inactivity.</b>\n\n/menu — open main menu.",
+-    },
+-
+ 
+ 
+ 
+@@ -421,5 +339,5 @@
+              "🇨🇿", "🇩🇰", "🇩🇯", "🇩🇲", "🇭🇷", "🇨🇮", "🇨🇷", "🇨🇰", "🇨🇩", "🇨🇬", "🇰🇲", "🇹🇩", "🇮🇴", "🇨🇱", "🇨🇳", "🇨🇽", "🇨🇨", "🇨🇴", "🇨🇫", "🇰🇾",
+              "🇧🇶", "🇨🇻", "🇮🇨", "🇨🇦", "🇨🇲", "🇧🇷", "🇻🇬", "🇧🇳", "🇧🇬", "🇧🇫", "🇧🇮", "🇰🇭", "🇧🇼", "🇧🇦", "🇧🇴", "🇧🇹", "🇧🇲", "🇧🇯", "🇧🇿", "🇦🇿",
+              "🇧🇸", "🇧🇭", "🇧🇩", "🇧🇧", "🇧🇾", "🇧🇪", "🇦🇹", "🇦🇺", "🇦🇼", "🇦🇲", "🇦🇷", "🇦🇬", "🇦🇶", "🇦🇮", "🇦🇴", "🇦🇩", "🇦🇸", "🇩🇿", "🇦🇱", "🇦🇽",
+-             "🇦🇫", "🇺🇳", "🏳️‍⚧️", "🏳️‍🌈", "🏳‍🌈"]
++             "🇦🇫", "🇺🇳", "🏳️‍⚧️", "🏳️‍🌈"]
+ 

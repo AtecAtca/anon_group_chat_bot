@@ -1,7 +1,7 @@
 from aiogram import types
 from aiogram.dispatcher import Dispatcher
 from aiogram.dispatcher.filters import Text
-from aiogram.utils.exceptions import BotBlocked
+from aiogram.utils.exceptions import BotBlocked, UserDeactivated
 from tools.logger import get_logger
 from tools.database import db
 from tools.bot import bot
@@ -16,13 +16,13 @@ async def connect(callback: types.CallbackQuery):
     language = await db.get(table_name='users',
                             items=('language',),
                             condition={'tg_id': uid})
-    await bot.edit_message_text(chat_id=uid,
-                                message_id=callback.message.message_id,
-                                text=all_messages['CONNECT'][language],
-                                reply_markup=kb.get('CONNECTION KEYBOARD', language))
-    await db.update(table_name='users',
-                    items={'status': 'in_connect'},
-                    condition={'tg_id': uid})
+    bot_message = await bot.edit_message_text(chat_id=uid,
+                                              message_id=callback.message.message_id,
+                                              text=all_messages['CONNECT'][language],
+                                              reply_markup=kb.get('CONNECTION KEYBOARD', language))
+    await db.update_many(table_name='users',
+                         items={'status': 'in_connect', 'last_activity': bot_message.edit_date},
+                         condition={'tg_id': uid})
     await callback.answer()
 
 
@@ -32,16 +32,53 @@ async def connect_public(callback: types.CallbackQuery):
     language = await db.get(table_name='users',
                             items=('language',),
                             condition={'tg_id': uid})
+
+    non_active_members_data = [i for i in await db.get_non_active_members_data()]
+
+    if non_active_members_data:
+        for afk_member_data in non_active_members_data:
+            afk_member_id, afk_member_language = afk_member_data
+            chat_members_data = [i for i in await db.get_chat_members(afk_member_id, with_language=True)]
+            await db.update_many(table_name='users',
+                                 items={'status': 'in_menu', 'in_chat': None},
+                                 condition={'tg_id': afk_member_id})
+            if chat_members_data:
+                nickname, flag = await db.get(table_name='users',
+                                              items=('nickname', 'flag'),
+                                              condition={'tg_id': afk_member_id})
+                flag = '' if flag is None else f'[{flag}]'
+                for member_data in chat_members_data:
+                    member_uid, member_language = member_data
+                    try:
+                        await bot.send_message(chat_id=member_uid,
+                                               parse_mode='html',
+                                               text=all_messages['USER KICKED'][member_language] \
+                                               .format(nickname, flag))
+                    except (BotBlocked, UserDeactivated) as e:
+                        logger.exception(e)
+                        await db.update_many(table_name='users',
+                                             items={'status': 'bot_blocked', 'in_chat': None},
+                                             condition={'tg_id': member_uid})
+            try:
+                await bot.send_message(afk_member_id, all_messages['KICKED MEMBER'][afk_member_language],
+                                       parse_mode='html')
+            except (BotBlocked, UserDeactivated) as e:
+                logger.exception(e)
+                await db.update_many(table_name='users',
+                                     items={'status': 'bot_blocked', 'in_chat': None},
+                                     condition={'tg_id': afk_member_id})
+
     public_chats_data = await db.get_public_chats_data()
-    await bot.edit_message_text(chat_id=uid,
-                                message_id=callback.message.message_id,
-                                text=all_messages['CONNECT PUBLIC'][language],
-                                reply_markup=kb.get_public_chats(
-                                             public_chats_data=public_chats_data,
-                                             language=language))
-    await db.update(table_name='users',
-                    items={'status': 'in_connect_public'},
-                    condition={'tg_id': uid})
+    bot_message = await bot.edit_message_text(chat_id=uid,
+                                              message_id=callback.message.message_id,
+                                              text=all_messages['CONNECT PUBLIC'][language],
+                                              parse_mode='html',
+                                              reply_markup=kb.get_public_chats(
+                                                           public_chats_data=public_chats_data,
+                                                           language=language))
+    await db.update_many(table_name='users',
+                         items={'status': 'in_connect_public', 'last_activity': bot_message.edit_date},
+                         condition={'tg_id': uid})
     await callback.answer()
 
 
@@ -51,13 +88,13 @@ async def connect_private(callback: types.CallbackQuery):
     language = await db.get(table_name='users',
                             items=('language',),
                             condition={'tg_id': uid})
-    await bot.edit_message_text(chat_id=uid,
-                                message_id=callback.message.message_id,
-                                text=all_messages['CONNECT PRIVATE'][language],
-                                reply_markup=kb.get('PRIVATE CHATS KEYBOARD', language))
-    await db.update(table_name='users',
-                    items={'status': 'in_connect_private'},
-                    condition={'tg_id': uid})
+    bot_message = await bot.edit_message_text(chat_id=uid,
+                                              message_id=callback.message.message_id,
+                                              text=all_messages['CONNECT PRIVATE'][language],
+                                              reply_markup=kb.get('PRIVATE CHATS KEYBOARD', language))
+    await db.update_many(table_name='users',
+                         items={'status': 'in_connect_private', 'last_activity': bot_message.edit_date},
+                         condition={'tg_id': uid})
     await callback.answer()
 
 
@@ -67,13 +104,13 @@ async def create(callback: types.CallbackQuery):
     language = await db.get(table_name='users',
                             items=('language',),
                             condition={'tg_id': uid})
-    await bot.edit_message_text(chat_id=uid,
-                                message_id=callback.message.message_id,
-                                text=all_messages['CREATE'][language],
-                                reply_markup=kb.get('CREATION KEYBOARD', language))
-    await db.update(table_name='users',
-                    items={'status': 'in_create'},
-                    condition={'tg_id': uid})
+    bot_message = await bot.edit_message_text(chat_id=uid,
+                                              message_id=callback.message.message_id,
+                                              text=all_messages['CREATE'][language],
+                                              reply_markup=kb.get('CREATION KEYBOARD', language))
+    await db.update_many(table_name='users',
+                         items={'status': 'in_create', 'last_activity': bot_message.edit_date},
+                         condition={'tg_id': uid})
     await callback.answer()
 
 
@@ -83,13 +120,13 @@ async def create_open(callback: types.CallbackQuery):
     language = await db.get(table_name='users',
                             items=('language',),
                             condition={'tg_id': uid})
-    await bot.edit_message_text(chat_id=uid,
-                                message_id=callback.message.message_id,
-                                text=all_messages['CREATE CHAT'][language],
-                                reply_markup=kb.get('CREATE OPEN CHAT KEYBOARD', language))
-    await db.update(table_name='users',
-                    items={'status': 'in_create_open'},
-                    condition={'tg_id': uid})
+    bot_message = await bot.edit_message_text(chat_id=uid,
+                                              message_id=callback.message.message_id,
+                                              text=all_messages['CREATE CHAT'][language],
+                                              reply_markup=kb.get('CREATE OPEN CHAT KEYBOARD', language))
+    await db.update_many(table_name='users',
+                         items={'status': 'in_create_open', 'last_activity': bot_message.edit_date},
+                         condition={'tg_id': uid})
     await callback.answer()
 
 
@@ -99,13 +136,13 @@ async def create_secret(callback: types.CallbackQuery):
     language = await db.get(table_name='users',
                             items=('language',),
                             condition={'tg_id': uid})
-    await bot.edit_message_text(chat_id=uid,
-                                message_id=callback.message.message_id,
-                                text=all_messages['CREATE CHAT'][language],
-                                reply_markup=kb.get('CREATE SECRET CHAT KEYBOARD', language))
-    await db.update(table_name='users',
-                    items={'status': 'in_create_secret'},
-                    condition={'tg_id': uid})
+    bot_message = await bot.edit_message_text(chat_id=uid,
+                                              message_id=callback.message.message_id,
+                                              text=all_messages['CREATE CHAT'][language],
+                                              reply_markup=kb.get('CREATE SECRET CHAT KEYBOARD', language))
+    await db.update_many(table_name='users',
+                         items={'status': 'in_create_secret', 'last_activity': bot_message.edit_date},
+                         condition={'tg_id': uid})
     await callback.answer()
 
 
@@ -115,16 +152,16 @@ async def settings(callback: types.CallbackQuery):
     nickname, language, flag = await db.get(table_name='users',
                                             items=('nickname', 'language', 'flag'),
                                             condition={'tg_id': uid})
-    if flag is None:
-        flag = all_messages['NO FLAG'][language]
-    await bot.edit_message_text(chat_id=uid,
-                                message_id=callback.message.message_id,
-                                text=all_messages['SETTINGS'][language].format(nickname, language, flag),
-                                parse_mode='html',
-                                reply_markup=kb.get('SETTINGS KEYBOARD', language))
-    await db.update(table_name='users',
-                    items={'status': 'in_settings'},
-                    condition={'tg_id': uid})
+    flag = all_messages['NO FLAG'][language] if flag is None else flag
+    bot_message = await bot.edit_message_text(chat_id=uid,
+                                              message_id=callback.message.message_id,
+                                              text=all_messages['SETTINGS'][language]\
+                                                   .format(nickname, language, flag),
+                                              parse_mode='html',
+                                              reply_markup=kb.get('SETTINGS KEYBOARD', language))
+    await db.update_many(table_name='users',
+                         items={'status': 'in_settings', 'last_activity': bot_message.edit_date},
+                         condition={'tg_id': uid})
     await callback.answer()
 
 
@@ -134,14 +171,14 @@ async def nickname(callback: types.CallbackQuery):
     language, nickname = await db.get(table_name='users',
                                       items=('language', 'nickname'),
                                       condition={'tg_id': uid})
-    await bot.edit_message_text(chat_id=uid,
-                                message_id=callback.message.message_id,
-                                text=all_messages['EDIT NICKNAME'][language].format(nickname),
-                                parse_mode='html',
-                                reply_markup=kb.get('NICKNAME SETTINGS KEYBOARD', language))
-    await db.update(table_name='users',
-                    items={'status': 'in_set_nickname'},
-                    condition={'tg_id': uid})
+    bot_message = await bot.edit_message_text(chat_id=uid,
+                                              message_id=callback.message.message_id,
+                                              text=all_messages['EDIT NICKNAME'][language].format(nickname),
+                                              parse_mode='html',
+                                              reply_markup=kb.get('NICKNAME SETTINGS KEYBOARD', language))
+    await db.update_many(table_name='users',
+                         items={'status': 'in_set_nickname', 'last_activity': bot_message.edit_date},
+                         condition={'tg_id': uid})
     await callback.answer()
 
 
@@ -158,14 +195,15 @@ async def language(callback: types.CallbackQuery):
         language = await db.get(table_name='users',
                                 items=('language',),
                                 condition={'tg_id': uid})
-    await bot.edit_message_text(chat_id=uid,
-                                message_id=callback.message.message_id,
-                                text=all_messages['EDIT LANGUAGE'][language].format(kb.flags[language]),
-                                parse_mode='html',
-                                reply_markup=kb.get_language_keyboard(language))
-    await db.update(table_name='users',
-                    items={'status': 'in_set_language'},
-                    condition={'tg_id': uid})
+    bot_message = await bot.edit_message_text(chat_id=uid,
+                                              message_id=callback.message.message_id,
+                                              text=all_messages['EDIT LANGUAGE'][language]\
+                                                   .format((kb.flags[language]).replace(' ', '')),
+                                              parse_mode='html',
+                                              reply_markup=kb.get_language_keyboard(language))
+    await db.update_many(table_name='users',
+                         items={'status': 'in_set_language', 'last_activity': bot_message.edit_date},
+                         condition={'tg_id': uid})
     await callback.answer()
 
 
@@ -175,17 +213,16 @@ async def flag(callback: types.CallbackQuery):
     language, flag = await db.get(table_name='users',
                                   items=('language', 'flag'),
                                   condition={'tg_id': uid})
-    if flag is None:
-        flag = all_messages['NO FLAG'][language]
-    await bot.edit_message_text(chat_id=uid,
-                                message_id=callback.message.message_id,
-                                text=all_messages['EDIT FLAG'][language] \
-                                .format(flag, *choices(all_flags, k=3)),
-                                parse_mode='html',
-                                reply_markup=kb.get('FLAG SETTINGS KEYBOARD', language))
-    await db.update(table_name='users',
-                    items={'status': 'in_set_flag'},
-                    condition={'tg_id': uid})
+    flag = all_messages['NO FLAG'][language] if flag is None else flag
+    bot_message = await bot.edit_message_text(chat_id=uid,
+                                              message_id=callback.message.message_id,
+                                              text=all_messages['EDIT FLAG'][language] \
+                                                   .format(flag, *choices(all_flags, k=3)),
+                                              parse_mode='html',
+                                              reply_markup=kb.get('FLAG SETTINGS KEYBOARD', language))
+    await db.update_many(table_name='users',
+                         items={'status': 'in_set_flag', 'last_activity': bot_message.edit_date},
+                         condition={'tg_id': uid})
     await callback.answer()
 
 
@@ -195,13 +232,14 @@ async def back_to_menu(callback: types.CallbackQuery):
     language = await db.get(table_name='users',
                             items=('language',),
                             condition={'tg_id': uid})
-    await bot.edit_message_text(chat_id=uid,
-                                message_id=callback.message.message_id,
-                                text=all_messages['MENU'][language],
-                                reply_markup=kb.get('MENU KEYBOARD', language))
-    await db.update(table_name='users',
-                    items={'status': 'in_menu'},
-                    condition={'tg_id': uid})
+    bot_message = await bot.edit_message_text(chat_id=uid,
+                                              message_id=callback.message.message_id,
+                                              text=all_messages['MENU'][language],
+                                              parse_mode='html',
+                                              reply_markup=kb.get('MENU KEYBOARD', language))
+    await db.update_many(table_name='users',
+                         items={'status': 'in_menu', 'last_activity': bot_message.edit_date},
+                         condition={'tg_id': uid})
     await callback.answer()
 
 
@@ -217,14 +255,14 @@ async def join_public(callback: types.CallbackQuery):
                          condition={'tg_id': uid})
     chat_name = await db.get_chat_name(uid)
     chat_members_data = [i for i in await db.get_chat_members(uid, with_language=True)]
-    await bot.edit_message_text(chat_id=uid,
-                                message_id=callback.message.message_id,
-                                text=all_messages['ON PUBLIC'][language] \
-                                .format(all_keyboards['PUBLIC CHATS KEYBOARD'] \
-                                            [f'{chat_name.upper()} BUTTON'] \
-                                            ['NAME'][language].rstrip(),
-                                        len(chat_members_data)),
-                                parse_mode='html')
+    bot_message = await bot.edit_message_text(chat_id=uid,
+                                              message_id=callback.message.message_id,
+                                              text=all_messages['ON PUBLIC'][language] \
+                                                   .format(all_keyboards['PUBLIC CHATS KEYBOARD'] \
+                                                                        [f'{chat_name.upper()} BUTTON'] \
+                                                                        ['NAME'][language].replace(' ', ''),
+                                                           len(chat_members_data)+1),
+                                              parse_mode='html')
     if chat_members_data:
         nickname, flag = await db.get(table_name='users',
                                       items=('nickname', 'flag'),
@@ -242,8 +280,9 @@ async def join_public(callback: types.CallbackQuery):
                 await db.update_many(table_name='users',
                                      items={'status': 'bot_blocked', 'in_chat': None},
                                      condition={'tg_id': member_uid})
-            except Exception as e:
-                logger.exception(e)
+    await db.update(table_name='users',
+                    items={'last_activity': bot_message.edit_date},
+                    condition={'tg_id': uid})
     await callback.answer()
 
 

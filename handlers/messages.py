@@ -1,5 +1,5 @@
 from aiogram import types
-from aiogram.utils.exceptions import BotBlocked
+from aiogram.utils.exceptions import BotBlocked, UserDeactivated
 from aiogram.dispatcher import Dispatcher
 from tools.logger import get_logger
 from tools.database import db
@@ -39,11 +39,25 @@ async def message(message: types.Message):
                                     condition={'tg_id': uid})
                     await bot.send_message(uid, all_messages['NICKNAME']['NICKNAME SAVED'][language].format(nickname),
                                            parse_mode='html')
-                    await bot.send_message(uid, all_messages['MENU'][language],
-                                           reply_markup=kb.get('MENU KEYBOARD',language))
-                    await db.update(table_name='users',
-                                    items={'status': 'in_menu'},
-                                    condition={'tg_id': uid})
+                    if uid_status == 'without_nickname':
+                        await bot.send_message(uid, all_messages['MENU'][language],
+                                               parse_mode='html',
+                                               reply_markup=kb.get('MENU KEYBOARD',language))
+                        await db.update(table_name='users',
+                                        items={'status': 'in_menu'},
+                                        condition={'tg_id': uid})
+                    else:
+                        flag = await db.get(table_name='users',
+                                            items=('flag',),
+                                            condition={'tg_id': uid})
+                        await bot.send_message(chat_id=uid,
+                                               text=all_messages['SETTINGS'][language]
+                                                    .format(nickname, language, flag),
+                                               parse_mode='html',
+                                               reply_markup=kb.get('SETTINGS KEYBOARD', language))
+                        await db.update(table_name='users',
+                                        items={'status': 'in_settings'},
+                                        condition={'tg_id': uid})
                 # if nickname not unique
                 else:
                     await bot.send_message(uid, all_messages['NICKNAME']['NOT UNIQUE NICKNAME'][language])
@@ -82,16 +96,18 @@ async def message(message: types.Message):
                 for member in chat_members:
                     try:
                         await send_message(message, member, signature=signature)
-                    except BotBlocked as e:
+                    except (BotBlocked, UserDeactivated) as e:
                         logger.exception(e)
                         await db.update_many(table_name='users',
                                              items={'status': 'bot_blocked', 'in_chat': None},
                                              condition={'tg_id': member})
+
         case 'bot_blocked':
             language = await db.get(table_name='users',
                                     items=('language',),
                                     condition={'tg_id': uid})
             await bot.send_message(uid, all_messages['MENU'][language],
+                                   parse_mode='html',
                                    reply_markup=kb.get('MENU KEYBOARD', language))
             await db.update(table_name='users',
                             items={'status': 'in_menu'},
@@ -101,6 +117,9 @@ async def message(message: types.Message):
             await bot.delete_message(uid, message.message_id)
             logger.debug(f'delete message-{message.message_id}')
 
+    await db.update(table_name='users',
+                    items={'last_activity': message.date},
+                    condition={'tg_id': uid})
 
 
 
@@ -127,8 +146,11 @@ async def send_message(message: types.Message, member, signature):
             await bot.send_voice(member, voice=message.voice.file_id, parse_mode='html', caption=text)
         else:
             await bot.send_message(member, text=text, parse_mode='html')
-    except BotBlocked as e:
-        pass
+    except (BotBlocked, UserDeactivated) as e:
+        logger.exception(e)
+        await db.update_many(table_name='users',
+                             items={'status': 'bot_blocked', 'in_chat': None},
+                             condition={'tg_id': member})
 
 def message_handlers(dp: Dispatcher):
     dp.register_message_handler(message, content_types=['text', 'document', 'audio', 'photo', 'sticker', 'video',

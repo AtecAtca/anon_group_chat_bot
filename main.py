@@ -5,6 +5,7 @@ from tools.database import db
 from handlers.commands import commands_handlers
 from handlers.messages import message_handlers
 from handlers.callbacks import callback_handlers
+from handlers.errors import error_handlers
 import os
 
 async def on_startup(_):
@@ -32,9 +33,11 @@ def start(type):
 
 logger = get_logger('main.py')
 
+
 commands_handlers(dp)
 callback_handlers(dp)
 message_handlers(dp)
+error_handlers(dp)
 
 if __name__ == '__main__':
     #start('local')

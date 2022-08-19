@@ -183,11 +183,43 @@ class dataBase():
                 logger.debug(f'method db.get_public_chats_data: return result={result}')
                 return result
 
+    async def get_non_active_members_data(self):
+        query = """ SELECT tg_id, language FROM users
+                    WHERE in_chat IS NOT NULL
+                    AND last_activity-interval'3 hours' 
+                    NOT BETWEEN clock_timestamp()-interval'24 hours' AND clock_timestamp()
+                    ORDER BY last_activity DESC;;"""
+        with self.conn:
+            with self.conn.cursor() as cur:
+                logger.debug(f'method db.get_non_active_members_data: {query}')
+                cur.execute(query)
+                result = cur.fetchall()
+                if result is not None:
+                    logger.debug(f'method db.get_non_active_members_data: return result={result}')
+                    return result
+            logger.debug(f'method db.get_non_active_members_data: return result=None')
+
+
+    async def get_list_of_chat_members(self, uid):
+        query = """ SELECT tg_id, nickname, flag,
+                    clock_timestamp() - (last_activity - interval'3 hours')
+                    FROM users WHERE in_chat = get_chat_code(%s)
+                    ORDER BY last_activity DESC;"""
+        with self.conn:
+            with self.conn.cursor() as cur:
+                logger.debug(f'method db.get_list_of_chat_members: {query}')
+                cur.execute(query, (uid,))
+                result = cur.fetchall()
+                if result is not None:
+                    logger.debug(f'method db.get_list_of_chat_members: return result={result}')
+                    return result
+            logger.debug(f'method db.get_list_of_chat_members: return result=None')
+
+
 
 logger = get_logger('main.tools.database')
 db = dataBase('web')
 #db = dataBase('local')
-
 
 
 
