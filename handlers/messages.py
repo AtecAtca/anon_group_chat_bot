@@ -12,9 +12,13 @@ kb = Keyboard()
 async def message(message: types.Message):
     logger.debug(f'user {message.from_user.id} write message {message.text}')
     uid = message.from_user.id
-    uid_status, language = await db.get(table_name='users',
-                                        items=('status', 'language'),
-                                        condition={'tg_id': uid})
+    uid_status = await db.get(table_name='users',
+                              items=('status',),
+                              condition={'tg_id': uid})
+    language = await db.get(table_name='users',
+                            items=('language',),
+                            condition={'tg_id': uid})
+    
     language = default['language'] if language is None else language
     match uid_status:
         # new user without nickname or user edit nickname
