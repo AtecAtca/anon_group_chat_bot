@@ -18,23 +18,19 @@ class dataBase():
 
     def close_on_shutdown(self) -> None:
         self.conn.close()
-# GET
-#=======================================================================================================================
+
     async def get(self,
                   items: tuple,
                   table_name: str,
                   condition: dict,
                   order_by: dict=None,
                   fetchall=False,):
-
         key, value = tuple(condition.items())[0]
         query = f'SELECT {", ".join(items)} FROM {table_name} WHERE {key} = %s'
-
         with self.conn:
             with self.conn.cursor() as cur:
                 if order_by is not None:
                     query += ' ORDER BY {} {}'.format(*tuple(order_by.items())[0])
-
                 cur.execute(query, (value,))
                 result = cur.fetchall() if fetchall else cur.fetchone()
                 if result is None:
@@ -47,22 +43,18 @@ class dataBase():
                     else:
                         logger.debug(f'method db.get: return result={result}')
                         return result
-# UPDATE
-#=======================================================================================================================
+		
     async def update(self,
                      items: dict,
                      table_name: str,
                      condition: dict,
                      array_func: str=None):
-
         item_key, item_value = tuple(items.items())[0]
         condition_key, condition_value = tuple(condition.items())[0]
-
         if array_func is None:
             query = f'UPDATE {table_name} SET {item_key} = %s WHERE {condition_key} = %s;'
         else:
             query = f'UPDATE {table_name} SET {item_key} = {array_func}({item_key}, %s) WHERE {condition_key} = %s;'
-
         with self.conn:
             with self.conn.cursor() as cur:
                 logger.debug(f'method db.update: {query}, {item_value, condition_value}')
@@ -89,8 +81,6 @@ class dataBase():
                 logger.debug(f'method db.update_many: {query}, {*item_values, condition_value}')
                 cur.execute(query, (*item_values, condition_value))
 
-# INSERT
-#=======================================================================================================================
     async def insert(self, items: dict, table_name: str):
         keys = [key for key in items.keys()]
         values = [value for value in items.values()]
@@ -102,8 +92,6 @@ class dataBase():
                 logger.debug(f'method db.insert: {query}, {values}')
                 cur.execute(query, values)
 
-# CODE
-#=======================================================================================================================
     def create_code(self) -> str:
         code = ''
         for i in range(1, 5):
@@ -128,8 +116,6 @@ class dataBase():
         logger.debug(f'method db.is_nickname_in_all_symbols: return True')
         return True
 
-
-
     async def get_chat_members(self, uid: int, with_language=False):
         if with_language:
             query = "SELECT * FROM get_chat_members_with_language(%s);"
@@ -148,9 +134,6 @@ class dataBase():
                     logger.debug(f'method db.get_chat_members: return result={result}')
                     return result
 
-
-
-
     async def get_chat_name(self, uid):
         query = "SELECT chat_name FROM chats WHERE chat_code = get_chat_code(%s);"
         with self.conn:
@@ -164,7 +147,6 @@ class dataBase():
                 else:
                     logger.debug(f'method db.get_chat_name: return result={result[0]}')
                     return result[0]
-
 
     async def get_public_chats_data(self):
         query = """SELECT chats.chat_name, 
@@ -199,7 +181,6 @@ class dataBase():
                     return result
             logger.debug(f'method db.get_non_active_members_data: return result=None')
 
-
     async def get_list_of_chat_members(self, uid):
         query = """ SELECT tg_id, nickname, flag,
                     clock_timestamp() - (last_activity - interval'3 hours')
@@ -215,12 +196,5 @@ class dataBase():
                     return result
             logger.debug(f'method db.get_list_of_chat_members: return result=None')
 
-
-
 logger = get_logger('main.tools.database')
 db = dataBase('web')
-#db = dataBase('local')
-
-
-
-
