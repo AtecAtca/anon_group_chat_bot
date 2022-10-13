@@ -8,8 +8,6 @@ from tools.messages import all_messages, all_keyboards, default
 from keyboards.inline import Keyboard
 import datetime
 
-
-
 async def test(message: types.Message):
     uid = message.from_user.id
     uid_status = await db.get(table_name='users',
@@ -27,7 +25,7 @@ async def test(message: types.Message):
         case _:
             pass
 
-
+        
 async def start_menu(message: types.Message):
     logger.debug(f'user {message.from_user.id} pressed command /start.')
     uid = message.from_user.id
@@ -91,8 +89,6 @@ async def start_menu(message: types.Message):
                         await db.update_many(table_name='users',
                                              items={'status': 'bot_blocked', 'in_chat': None},
                                              condition={'tg_id': member_uid})
-
-
             language = await db.get(table_name='users',
                                     items=('language',),
                                     condition={'tg_id': uid})
