@@ -6,8 +6,6 @@ from tools.database import db
 
 async def bot_blocked(update: types.Update, exception: BotBlocked, uid=None):
     logger.debug(f'Exception {exception}: {update}')
-
-
     if update.message:
         uid = update.message.from_user.id
     if update.callback_query:
