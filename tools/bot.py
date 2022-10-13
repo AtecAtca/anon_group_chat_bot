@@ -1,9 +1,8 @@
 from aiogram.dispatcher import Dispatcher
 from aiogram import Bot
-import os
 from tools.logger import get_logger
+import os
 
-#TOKEN = os.environ.get('TOKEN') # web
 TOKEN = os.getenv('TOKEN')
 logger = get_logger('main.tools.bot.py')
 
@@ -14,6 +13,3 @@ except Exception as e:
 else:
     logger.info('Telegram bot connected successfully.')
     dp = Dispatcher(bot)
-
-
-
