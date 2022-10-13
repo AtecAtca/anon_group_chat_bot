@@ -3,13 +3,10 @@ from string import ascii_lowercase, digits, punctuation
 cyrillic_lowercase = 'абвгдежзийклмнопрстуфхцчшщъыьэюяёєії'
 all_symbols = ascii_lowercase + cyrillic_lowercase + digits + punctuation + ' ' + '<' + '>'
 
-
-
 default = {
     'language': 'RU'
 }
 
-# 'CALLBACK DATA': 'connect',
 all_keyboards = {
     'MENU KEYBOARD': {
         'CONNECT BUTTON': {
@@ -20,14 +17,6 @@ all_keyboards = {
                 'EN': '🟢      CONNECT',
             }
         },
-#        'CREATE BUTTON': {
-#            'CALLBACK DATA': 'create',
-#            'NAME': {
-#                'UA': 'Створити',
-#                'RU': 'Создать',
-#                'EN': 'Create',
-#            }
-#        },
         'SETTINGS BUTTON': {
             'CALLBACK DATA': 'settings',
             'NAME': {
@@ -46,14 +35,6 @@ all_keyboards = {
                 'EN': 'Public chats',
             }
         },
-#        'PRIVATE CHATS': {
-#            'CALLBACK DATA': 'connect_private',
-#            'NAME': {
-#                'UA': 'Приватні чати',
-#                'RU': 'Приватные чаты',
-#                'EN': 'Private chats',
-#            }
-#        },
         'BACK TO MENU BUTTON': {
             'CALLBACK DATA': 'back_to_menu',
             'NAME': {
@@ -149,38 +130,6 @@ all_keyboards = {
                 'EN': '🍓  ️ ️   18+ chat      ️',
             }
         },
-#        'FILMS BUTTON': {
-#            'CALLBACK DATA': '3333',
-#            'NAME': {
-#                'UA': '🎬 Кіно          ️ ️',
-#                'RU': '🎬 Кино     ️ ️️ ️ ️     ️ ️️ ️ ️ ',
-#                'EN': '🎬 Films  ',
-#            }
-#        },
-#        'ANIME BUTTON': {
-#            'CALLBACK DATA': '4444',
-#            'NAME': {
-#                'UA': '💩 Аніме ️ ️     ️ ️',
-#                'RU': '💩 Аниме  ️ ️️ ️ ️     ️ ️️ ️ ️ ',
-#                'EN': '💩 Anime',
-#            }
-#        },
-#        'BOOKS BUTTON': {
-#            'CALLBACK DATA': '5555',
-#            'NAME': {
-#                'UA': '📖 Книги    ️ ️️ ️ ️ ',
-#                'RU': '📖 Книги   ️ ️️ ️ ️     ️ ️️ ️ ️ ',
-#                'EN': '📖 Books',
-#            }
-#        },
-#        'TRAVEL BUTTON': {
-#            'CALLBACK DATA': '6666',
-#            'NAME': {
-#                'UA': '🗺 Подорожі',
-#                'RU': '🗺 Путешествия',
-#                'EN': '🗺 Travel',
-#            }
-#        },
         'BACK TO CONNECTION BUTTON': {
             'CALLBACK DATA': 'back_to_menu', #'connect'
             'NAME': {
@@ -251,11 +200,6 @@ all_keyboards = {
         },
     },
 }
-
-
-
-
-
 
 all_messages = {
     'NICKNAME': {
@@ -390,10 +334,6 @@ all_messages = {
         'RU': '<b>⚠️ Вы были отключены за бездействие в чате.</b>\n\n/menu — открыть главное меню.',
         'EN': "<b>⚠️ You have been disconnected for chat inactivity.</b>\n\n/menu — open main menu.",
     },
-
-
-
-
     "MAIN MENU": "WELCOME TO ANONYMOUS CHATS\n\nYou can create our own chat or join chat if you have invite code.\n\n\nTHERE ARE NO RULES HERE",
     "HOST PRIVATE MENU": "⚠️ It's your private chat.\n\nSomeone who gets your password can connect.\n\nPassword: {}",
     "HOST PUBLIC MENU": "⚠️ It's your public chat.\n\nAnyone can join here.\n\nChat name: *{}*",
@@ -401,13 +341,11 @@ all_messages = {
     "CREATE PUBLIC CHAT": "⚠️ Write public chat name:"
 }
 
-
 all_status = ['without_nickname',
             'in_menu', 'in_connect', 'in_connect_public', 'in_connect_private',
             'in_create', 'in_create_open', 'in_create_secret',
             'in_settings', 'in_set_nickname', 'in_set_language', 'in_set_flag']
 
-#max item len = 7
 all_flags = ["🇿🇼", "🇿🇲", "🇾🇪", "🇪🇭", "🇼🇫", "🇺🇾", "🇻🇮", "🇺🇿", "🇻🇺", "🇻🇪", "🇻🇳", "🇺🇸", "🏴󠁧󠁢󠁷󠁬󠁳󠁿", "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "🇬🇧", "🇦🇪", "🇺🇦", "🇹🇹",
              "🇹🇳", "🇹🇷", "🇹🇲", "🇹🇨", "🇹🇻", "🇺🇬", "🇹🇴", "🇹🇰", "🇹🇬", "🇹🇱", "🇹🇭", "🇹🇿", "🇹🇯", "🇻🇨", "🇸🇩", "🇸🇷", "🇸🇪", "🇸🇾", "🇹🇼",
              "🇵🇲", "🇱🇨", "🇰🇳", "🇸🇭", "🇧🇱", "🇱🇰", "🇪🇸", "🇸🇮", "🇬🇸", "🇸🇧", "🇸🇴", "🇿🇦", "🇰🇷", "🇸🇸", "🇸🇰", "🇸🇽", "🇸🇬", "🇸🇱", "🇸🇨",
@@ -422,4 +360,3 @@ all_flags = ["🇿🇼", "🇿🇲", "🇾🇪", "🇪🇭", "🇼🇫", "🇺�
              "🇧🇶", "🇨🇻", "🇮🇨", "🇨🇦", "🇨🇲", "🇧🇷", "🇻🇬", "🇧🇳", "🇧🇬", "🇧🇫", "🇧🇮", "🇰🇭", "🇧🇼", "🇧🇦", "🇧🇴", "🇧🇹", "🇧🇲", "🇧🇯", "🇧🇿", "🇦🇿",
              "🇧🇸", "🇧🇭", "🇧🇩", "🇧🇧", "🇧🇾", "🇧🇪", "🇦🇹", "🇦🇺", "🇦🇼", "🇦🇲", "🇦🇷", "🇦🇬", "🇦🇶", "🇦🇮", "🇦🇴", "🇦🇩", "🇦🇸", "🇩🇿", "🇦🇱", "🇦🇽",
              "🇦🇫", "🇺🇳", "🏳️‍⚧️", "🏳️‍🌈", "🏳‍🌈"]
-
