@@ -9,7 +9,6 @@ from tools.messages import all_messages, all_flags, all_keyboards
 from keyboards.inline import Keyboard
 from random import choices
 
-
 async def connect(callback: types.CallbackQuery):
     logger.debug(f'function connect: get "connect" callback {callback}')
     uid = callback.from_user.id
@@ -25,7 +24,7 @@ async def connect(callback: types.CallbackQuery):
                          condition={'tg_id': uid})
     await callback.answer()
 
-
+    
 async def connect_public(callback: types.CallbackQuery):
     logger.debug(f'function connect_public: get "connect_public" callback {callback}')
     uid = callback.from_user.id
@@ -34,7 +33,6 @@ async def connect_public(callback: types.CallbackQuery):
                             condition={'tg_id': uid})
 
     non_active_members_data = [i for i in await db.get_non_active_members_data()]
-
     if non_active_members_data:
         for afk_member_data in non_active_members_data:
             afk_member_id, afk_member_language = afk_member_data
@@ -67,7 +65,6 @@ async def connect_public(callback: types.CallbackQuery):
                 await db.update_many(table_name='users',
                                      items={'status': 'bot_blocked', 'in_chat': None},
                                      condition={'tg_id': afk_member_id})
-
     public_chats_data = await db.get_public_chats_data()
     bot_message = await bot.edit_message_text(chat_id=uid,
                                               message_id=callback.message.message_id,
