@@ -17,8 +17,7 @@ async def message(message: types.Message):
                               condition={'tg_id': uid})
     language = await db.get(table_name='users',
                             items=('language',),
-                            condition={'tg_id': uid})
-    
+                            condition={'tg_id': uid})   
     language = default['language'] if language is None else language
     match uid_status:
         # new user without nickname or user edit nickname
@@ -105,7 +104,6 @@ async def message(message: types.Message):
                         await db.update_many(table_name='users',
                                              items={'status': 'bot_blocked', 'in_chat': None},
                                              condition={'tg_id': member})
-
         case 'bot_blocked':
             language = await db.get(table_name='users',
                                     items=('language',),
@@ -125,9 +123,7 @@ async def message(message: types.Message):
                     items={'last_activity': message.date},
                     condition={'tg_id': uid})
 
-
-
-
+    
 async def send_message(message: types.Message, member, signature):
     if message.text is None:
         text = f'<code>{signature}</code>'
@@ -156,6 +152,7 @@ async def send_message(message: types.Message, member, signature):
                              items={'status': 'bot_blocked', 'in_chat': None},
                              condition={'tg_id': member})
 
+        
 def message_handlers(dp: Dispatcher):
     dp.register_message_handler(message, content_types=['text', 'document', 'audio', 'photo', 'sticker', 'video',
                                                         'voice', 'location', 'contact', 'video_note', 'animation'])
